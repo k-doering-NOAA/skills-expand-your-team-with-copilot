@@ -163,6 +163,11 @@ section h3 {
   font-size: 0.85rem;
 }
 
+.shared-activity {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.18);
+}
+
 .activity-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
@@ -236,6 +241,62 @@ section h3 {
 
 .capacity-available .capacity-bar-fill {
   background-color: var(--success);
+}
+
+.share-actions {
+  margin: 10px 0 2px;
+  padding: 10px;
+  background-color: var(--background);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+}
+
+.share-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.share-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.share-button,
+.copy-link-button,
+.email-share-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: bold;
+}
+
+.share-button {
+  background-color: var(--primary);
+  color: var(--primary-text);
+}
+
+.copy-link-button {
+  background-color: var(--secondary);
+  color: var(--secondary-text);
+}
+
+.email-share-button {
+  background-color: var(--success);
+  color: var(--primary-text);
+}
+
+.share-preview {
+  margin-top: 8px;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
 }
 
 /* Participants list */
