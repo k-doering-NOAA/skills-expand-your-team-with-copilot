@@ -168,6 +168,11 @@ section h3 {
   box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.18);
 }
 
+.shared-activity:hover {
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(255, 111, 0, 0.18), 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
 .activity-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
@@ -291,6 +296,12 @@ section h3 {
 .email-share-button {
   background-color: var(--success);
   color: var(--primary-text);
+}
+
+.share-button:hover,
+.copy-link-button:hover,
+.email-share-button:hover {
+  filter: brightness(1.05);
 }
 
 .share-preview {

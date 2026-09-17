@@ -711,7 +711,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ${
           currentUser
             ? `
-          <button class="register-button" data-activity="${name}" ${
+          <button class="register-button" data-activity="${escapedName}" ${
                 isFull ? "disabled" : ""
               }>
             ${isFull ? "Activity Full" : "Register Student"}
