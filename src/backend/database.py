@@ -22,8 +22,20 @@ def init_database():
 
     # Insert any missing activities without overwriting existing signups
     for name, details in initial_activities.items():
-        if not activities_collection.find_one({"_id": name}):
+        existing_activity = activities_collection.find_one({"_id": name})
+
+        if not existing_activity:
             activities_collection.insert_one({"_id": name, **details})
+            continue
+
+        missing_fields = {
+            key: value for key, value in details.items() if key not in existing_activity
+        }
+        if missing_fields:
+            activities_collection.update_one(
+                {"_id": name},
+                {"$set": missing_fields}
+            )
             
     # Initialize teacher accounts if empty
     if teachers_collection.count_documents({}) == 0:
@@ -34,6 +46,7 @@ def init_database():
 initial_activities = {
     "Chess Club": {
         "description": "Learn strategies and compete in chess tournaments",
+        "difficulty": "beginner",
         "schedule": "Mondays and Fridays, 3:15 PM - 4:45 PM",
         "schedule_details": {
             "days": ["Monday", "Friday"],
@@ -45,6 +58,7 @@ initial_activities = {
     },
     "Programming Class": {
         "description": "Learn programming fundamentals and build software projects",
+        "difficulty": "beginner",
         "schedule": "Tuesdays and Thursdays, 7:00 AM - 8:00 AM",
         "schedule_details": {
             "days": ["Tuesday", "Thursday"],
@@ -133,6 +147,7 @@ initial_activities = {
     },
     "Debate Team": {
         "description": "Develop public speaking and argumentation skills",
+        "difficulty": "intermediate",
         "schedule": "Fridays, 3:30 PM - 5:30 PM",
         "schedule_details": {
             "days": ["Friday"],
@@ -144,6 +159,7 @@ initial_activities = {
     },
     "Weekend Robotics Workshop": {
         "description": "Build and program robots in our state-of-the-art workshop",
+        "difficulty": "intermediate",
         "schedule": "Saturdays, 10:00 AM - 2:00 PM",
         "schedule_details": {
             "days": ["Saturday"],
@@ -155,6 +171,7 @@ initial_activities = {
     },
     "Science Olympiad": {
         "description": "Weekend science competition preparation for regional and state events",
+        "difficulty": "advanced",
         "schedule": "Saturdays, 1:00 PM - 4:00 PM",
         "schedule_details": {
             "days": ["Saturday"],
@@ -166,6 +183,7 @@ initial_activities = {
     },
     "Sunday Chess Tournament": {
         "description": "Weekly tournament for serious chess players with rankings",
+        "difficulty": "advanced",
         "schedule": "Sundays, 2:00 PM - 5:00 PM",
         "schedule_details": {
             "days": ["Sunday"],

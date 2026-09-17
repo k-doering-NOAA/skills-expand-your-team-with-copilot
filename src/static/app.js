@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const categoryFilters = document.querySelectorAll(".category-filter");
   const dayFilters = document.querySelectorAll(".day-filter");
   const timeFilters = document.querySelectorAll(".time-filter");
+  const difficultyFilters = document.querySelectorAll(".difficulty-filter");
 
   // Authentication elements
   const loginButton = document.getElementById("login-button");
@@ -24,6 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginForm = document.getElementById("login-form");
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
+  const themeToggleButton = document.getElementById("theme-toggle");
+  const themeToggleIcon = document.getElementById("theme-toggle-icon");
+  const themeToggleText = document.getElementById("theme-toggle-text");
 
   // Activity categories with corresponding colors
   const activityTypes = {
@@ -42,9 +46,38 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentTimeRange = "";
   let sharedActivityName = null;
   let hasFocusedSharedActivity = false;
+  let currentDifficulty = "";
+  const themeStorageKey = "preferredTheme";
 
   // Authentication state
   let currentUser = null;
+
+  function applyTheme(theme) {
+    const isDarkMode = theme === "dark";
+
+    document.body.classList.toggle("dark-mode", isDarkMode);
+    themeToggleButton.setAttribute("aria-pressed", String(isDarkMode));
+    themeToggleButton.setAttribute(
+      "aria-label",
+      isDarkMode ? "Switch to light mode" : "Switch to dark mode"
+    );
+    themeToggleIcon.textContent = isDarkMode ? "☀️" : "🌙";
+    themeToggleText.textContent = isDarkMode ? "Light mode" : "Dark mode";
+  }
+
+  function initializeTheme() {
+    const savedTheme = localStorage.getItem(themeStorageKey);
+    applyTheme(savedTheme === "dark" ? "dark" : "light");
+  }
+
+  function toggleTheme() {
+    const nextTheme = document.body.classList.contains("dark-mode")
+      ? "light"
+      : "dark";
+
+    localStorage.setItem(themeStorageKey, nextTheme);
+    applyTheme(nextTheme);
+  }
 
   // Time range mappings for the dropdown
   const timeRanges = {
@@ -164,6 +197,11 @@ document.addEventListener("DOMContentLoaded", () => {
     sharedCard.scrollIntoView({ behavior: "smooth", block: "center" });
     showMessage(`Shared activity opened: ${sharedActivityName}`, "info");
   }
+  const difficultyLabels = {
+    beginner: "Beginner",
+    intermediate: "Intermediate",
+    advanced: "Advanced",
+  };
 
   // Initialize filters from active elements
   function initializeFilters() {
@@ -177,6 +215,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const activeTimeFilter = document.querySelector(".time-filter.active");
     if (activeTimeFilter) {
       currentTimeRange = activeTimeFilter.dataset.time;
+    }
+
+    const activeDifficultyFilter = document.querySelector(
+      ".difficulty-filter.active"
+    );
+    if (activeDifficultyFilter) {
+      currentDifficulty = activeDifficultyFilter.dataset.difficulty;
     }
   }
 
@@ -349,6 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Event listeners for authentication
+  themeToggleButton.addEventListener("click", toggleTheme);
   loginButton.addEventListener("click", openLoginModal);
   logoutButton.addEventListener("click", logout);
   closeLoginModal.addEventListener("click", closeLoginModalHandler);
@@ -479,6 +525,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return "academic";
   }
 
+  function normalizeDifficulty(difficulty) {
+    return typeof difficulty === "string" ? difficulty.toLowerCase() : "";
+  }
+
+  function getDifficultyLabel(difficulty) {
+    return difficultyLabels[normalizeDifficulty(difficulty)] || difficulty || "";
+  }
+
   // Function to fetch activities from API with optional day and time filters
   async function fetchActivities() {
     // Show loading skeletons first
@@ -535,6 +589,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     Object.entries(allActivities).forEach(([name, details]) => {
       const activityType = getActivityType(name, details.description);
+      const activityDifficulty = normalizeDifficulty(details.difficulty);
 
       // Apply category filter
       if (currentFilter !== "all" && activityType !== currentFilter) {
@@ -553,11 +608,24 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+      if (currentDifficulty === "all" && activityDifficulty) {
+        return;
+      }
+
+      if (
+        currentDifficulty &&
+        currentDifficulty !== "all" &&
+        activityDifficulty !== currentDifficulty
+      ) {
+        return;
+      }
+
       // Apply search filter
       const searchableContent = [
         name.toLowerCase(),
         details.description.toLowerCase(),
         formatSchedule(details).toLowerCase(),
+        getDifficultyLabel(details.difficulty).toLowerCase(),
       ].join(" ");
 
       if (
@@ -630,6 +698,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (name === sharedActivityName) {
       activityCard.classList.add("shared-activity");
     }
+    const difficultyLabel = getDifficultyLabel(details.difficulty);
 
     // Create activity tag
     const tagHtml = `
@@ -655,6 +724,9 @@ document.addEventListener("DOMContentLoaded", () => {
       ${tagHtml}
       <h4>${escapedName}</h4>
       <p>${escapedDescription}</p>
+      <h4>${name}</h4>
+      <p>${details.description}</p>
+      ${details.difficulty ? `<p><strong>Difficulty:</strong> ${difficultyLabel}</p>` : ""}
       <p class="tooltip">
         <strong>Schedule:</strong> ${escapedSchedule}
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
@@ -798,6 +870,23 @@ document.addEventListener("DOMContentLoaded", () => {
       // Update current time filter and fetch activities
       currentTimeRange = button.dataset.time;
       fetchActivities();
+    });
+  });
+
+  difficultyFilters.forEach((button) => {
+    button.addEventListener("click", () => {
+      const isClearingFilter = button.classList.contains("active");
+
+      difficultyFilters.forEach((btn) => btn.classList.remove("active"));
+
+      if (isClearingFilter) {
+        currentDifficulty = "";
+      } else {
+        button.classList.add("active");
+        currentDifficulty = button.dataset.difficulty;
+      }
+
+      displayFilteredActivities();
     });
   });
 
@@ -1022,6 +1111,7 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Initialize app
+  initializeTheme();
   checkAuthentication();
   initializeFilters();
   initializeSharedActivity();
