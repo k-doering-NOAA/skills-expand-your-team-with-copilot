@@ -32,6 +32,26 @@
   --info-light: #d1ecf1;
 }
 
+body.dark-mode {
+  --primary: #273b8c;
+  --primary-light: #4f67c6;
+  --primary-dark: #1a275f;
+  --secondary: #ff9f43;
+  --secondary-light: #ffb56d;
+  --secondary-dark: #cc7a24;
+  --background: #111827;
+  --surface: #1f2937;
+  --text-primary: #f3f4f6;
+  --text-secondary: #d1d5db;
+  --border: #374151;
+  --border-light: #4b5563;
+  --border-focus: #6b7280;
+  --success-light: #14301a;
+  --warning-light: #3f2d12;
+  --error-light: #3b1217;
+  --info-light: #12303a;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -43,11 +63,17 @@ body {
   font-family: Arial, sans-serif;
   line-height: 1.4;
   color: var(--text-primary);
+  color-scheme: light;
   max-width: 1200px;
   margin: 0 auto;
   padding: 12px;
   background-color: var(--background);
   font-size: 0.9rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+body.dark-mode {
+  color-scheme: dark;
 }
 
 header {
@@ -487,6 +513,8 @@ footer {
   flex: 1;
   min-width: 0; /* Add this to prevent input from overflowing */
   padding: 6px 10px;
+  background-color: var(--surface);
+  color: var(--text-primary);
   border: 1px solid var(--border);
   border-right: none;
   border-radius: 20px 0 0 20px;
@@ -621,6 +649,9 @@ footer {
   position: absolute;
   top: 10px;
   right: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 #user-status {
